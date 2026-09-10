@@ -1,120 +1,15 @@
 from pathlib import Path
-import base64,re
+import base64,gzip,re
 
-p=Path('app/src/main/java/com/divar/pricemeter/MainActivity.java')
-s=p.read_text()
+# Replace the old fragile activity with the corrected v13 implementation.
+MAIN_B64='''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'''
+Path('app/src/main/java/com/divar/pricemeter/MainActivity.java').write_bytes(gzip.decompress(base64.b64decode(MAIN_B64)))
 
-# Premium navy/gold theme
-s=s.replace('getWindow().setStatusBarColor(Color.rgb(25,35,30));','getWindow().setStatusBarColor(Color.rgb(5,16,32));')
-s=s.replace('root.setBackgroundColor(Color.rgb(245,247,246));root.setPadding(dp(14),dp(42),dp(14),dp(10));','root.setBackgroundColor(Color.rgb(5,18,35));root.setPadding(dp(12),dp(18),dp(12),dp(10));')
-s=s.replace('t.setTextColor(Color.rgb(70,70,70));','t.setTextColor(Color.rgb(239,196,91));')
-s=s.replace('e.setSingleLine(true);e.setPadding(dp(12),0,dp(12),0);e.setBackground(bg(Color.WHITE,14));','e.setSingleLine(true);e.setTextColor(Color.WHITE);e.setHintTextColor(Color.rgb(150,162,180));e.setPadding(dp(12),0,dp(12),0);e.setBackground(bg(Color.rgb(11,29,51),14));')
-s=s.replace('b.setTextColor(Color.WHITE);b.setBackground(bg(Color.rgb(45,125,95),18));','b.setTextColor(Color.rgb(7,22,40));b.setTypeface(null,1);b.setBackground(bg(Color.rgb(226,178,67),18));')
-s=s.replace('results.setTextColor(Color.DKGRAY);','results.setTextColor(Color.rgb(235,238,244));')
-s=s.replace('rs.setBackground(bg(Color.WHITE,16));','rs.setBackground(bg(Color.rgb(9,28,50),18));')
-
-# Header with the original Shahran logo
-old='TextView title=new TextView(this);title.setText("تحلیل قیمت دیوار");title.setTextSize(23);title.setTextColor(Color.WHITE);title.setGravity(Gravity.CENTER);title.setTypeface(null,1);title.setBackground(bg(Color.rgb(32,75,57),18));root.addView(title,new LinearLayout.LayoutParams(-1,dp(58)));'
-new='LinearLayout brand=new LinearLayout(this);brand.setOrientation(LinearLayout.VERTICAL);brand.setGravity(Gravity.CENTER);brand.setPadding(dp(8),dp(8),dp(8),dp(8));brand.setBackground(bg(Color.rgb(7,27,49),22));ImageView logo=new ImageView(this);logo.setImageResource(com.divar.pricemeter.R.drawable.logo);logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);brand.addView(logo,new LinearLayout.LayoutParams(-1,dp(112)));TextView title=new TextView(this);title.setText("تحلیل قیمت دیوار");title.setTextSize(25);title.setTextColor(Color.rgb(239,196,91));title.setGravity(Gravity.CENTER);title.setTypeface(null,1);brand.addView(title,new LinearLayout.LayoutParams(-1,dp(48)));TextView sub=new TextView(this);sub.setText("تحلیل و استخراج اطلاعات آگهی‌های دیوار");sub.setTextSize(14);sub.setTextColor(Color.rgb(224,207,160));sub.setGravity(Gravity.CENTER);brand.addView(sub,new LinearLayout.LayoutParams(-1,dp(30)));root.addView(brand,new LinearLayout.LayoutParams(-1,dp(200)));'
-s=s.replace(old,new)
-
-# Make category spinner dark/gold
-s=s.replace('category.setBackground(bg(Color.WHITE,14));','category.setBackground(bg(Color.rgb(11,29,51),14));')
-
-# Replace collector so it scrolls the actual Divar scroll container and harvests hidden /v/ URLs.
-start=s.index('    void collect(int n){')
-end=s.index('    void parseSearch(){',start)
-collect=r'''    void collect(int n){
-        if(n>=180){parseSearch();return;}
-        String js="(function(){const out=new Set();document.querySelectorAll('a[href]').forEach(a=>{let h=a.href||'';if(h.includes('/v/'))out.add(h);});const html=document.documentElement.outerHTML||'';const rx=/https?:\\/\\/divar\\.ir\\/v\\/[A-Za-z0-9_-]+/g;let m;while((m=rx.exec(html))!==null)out.add(m[0]);document.querySelectorAll('button').forEach(b=>{let t=(b.innerText||'').trim();if(/بیشتر|نمایش بیشتر|آگهی/.test(t)&&t.length<80){try{b.click()}catch(e){}}});let els=[document.scrollingElement,...document.querySelectorAll('*')].filter(e=>e&&e.scrollHeight>e.clientHeight+150).sort((a,b)=>(b.scrollHeight-b.clientHeight)-(a.scrollHeight-a.clientHeight)).slice(0,8);els.forEach(e=>{try{e.scrollTop=Math.min(e.scrollHeight,e.scrollTop+Math.max(e.clientHeight*.9,600))}catch(x){}});window.scrollBy(0,Math.max(window.innerHeight*.9,600));return JSON.stringify([...out]);})()";
-        web.evaluateJavascript(js,val->{
-            String z=unquote(val);
-            Matcher m=Pattern.compile("https://divar\\.ir/v/[A-Za-z0-9_-]+").matcher(z);
-            while(m.find()&&links.size()<1200) if(!links.contains(m.group())) links.add(m.group());
-            summary.setText("آگهی‌های پیدا شده: "+links.size()+" / 1200");
-            web.postDelayed(()->collect(n+1),220);
-        });
-    }
-'''
-s=s[:start]+collect+s[end:]
-
-# Replace parser with a version that also harvests relative URLs from the DOM/HTML.
-start=s.index('    void parseSearch(){')
-end=s.index('    String unquote',start)
-parse=r'''    void parseSearch(){
-        String js="(function(){const out=new Set();document.querySelectorAll('a[href]').forEach(a=>{let h=a.href||'';if(h.includes('/v/'))out.add(h)});let html=document.documentElement.outerHTML||'';let rx=/(?:https?:\\/\\/divar\\.ir)?\\/v\\/[A-Za-z0-9_-]+/g,m;while((m=rx.exec(html))!==null){let h=m[0];if(h.startsWith('/'))h='https://divar.ir'+h;out.add(h)}return JSON.stringify([...out]);})()";
-        web.evaluateJavascript(js,val->{
-            String z=unquote(val);
-            Matcher m=Pattern.compile("https://divar\\.ir/v/[A-Za-z0-9_-]+").matcher(z);
-            while(m.find()&&links.size()<1200) if(!links.contains(m.group())) links.add(m.group());
-            if(links.isEmpty()){summary.setText("لینک آگهی‌ها استخراج نشد؛ صفحه دیوار یا اتصال اینترنت را بررسی کنید.");return;}
-            summary.setText("تعداد "+links.size()+" آگهی پیدا شد؛ استخراج جزئیات شروع شد…");
-            running=true;processNext();
-        });
-    }
-'''
-s=s[:start]+parse+s[end:]
-
-# Replace sequential detail navigation with fast same-origin fetch batches. This is not an anti-bot bypass; it uses the loaded Divar session normally.
-start=s.index('    void processNext(){')
-end=s.index('    Listing parse(',start)
-proc=r'''    void processNext(){
-        if(!running)return;
-        if(detailIndex>=links.size()){running=false;showResults();return;}
-        int from=detailIndex,to=Math.min(detailIndex+12,links.size());
-        ArrayList<String> batch=new ArrayList<>(links.subList(from,to));
-        StringBuilder arr=new StringBuilder("[");for(int i=0;i<batch.size();i++){if(i>0)arr.append(',');arr.append("\\\"").append(batch.get(i).replace("\\\"","\\\\\\\"")).append("\\\"");}arr.append(']');
-        String js="(async function(urls){let out=[];for(let u of urls){try{let r=await fetch(u,{credentials:'include'});let h=await r.text();let d=new DOMParser().parseFromString(h,'text/html');out.push({u:u,t:(d.querySelector('h1')||{}).innerText||'',b:d.body?d.body.innerText:''});}catch(e){out.push({u:u,t:'',b:''});}}return JSON.stringify(out);})("+arr+")";
-        detailWeb.evaluateJavascript(js,val->{
-            try{
-                String raw=unquote(val);
-                org.json.JSONArray a=new org.json.JSONArray(raw);
-                for(int j=0;j<a.length();j++){org.json.JSONObject o=a.getJSONObject(j);rows.add(parse(o.optString("u"),o.optString("t"),o.optString("b")));}
-            }catch(Exception e){for(String u:batch){Listing l=new Listing();l.link=u;rows.add(l);}}
-            detailIndex=to;summary.setText("در حال دریافت جزئیات: "+detailIndex+" / "+links.size());detailWeb.postDelayed(this::processNext,180);
-        });
-    }
-
-'''
-s=s[:start]+proc+s[end:]
-
-# Improve area extraction.
-s=s.replace('String area(String t){Matcher m=Pattern.compile("(?<![0-9])([0-9]{2,4})\\\\s*(?:متر(?:مربع)?|m²|m2)").matcher(norm(t));return m.find()?m.group(1):"";}', 'String area(String t){Matcher m=Pattern.compile("(?<![0-9])([0-9]{2,4})(?:\\\\.\\\\d+)?\\\\s*(?:متر(?:مربع)?|متر|m²|m2)").matcher(norm(t));return m.find()?m.group(1):"";}')
-
-# Save Excel directly into Downloads on Android 10+, avoiding the unreliable document-picker path.
-start=s.index('    void exportXlsx(){')
-end=s.index('    String esc(',start)
-export=r'''    void exportXlsx(){
-        if(rows.isEmpty()){Toast.makeText(this,"ابتدا جستجو و تحلیل را انجام دهید",Toast.LENGTH_LONG).show();return;}
-        try{
-            String name="DivarPriceAnalysis_"+new java.text.SimpleDateFormat("yyyyMMdd_HHmm",Locale.US).format(new java.util.Date())+".xlsx";
-            if(Build.VERSION.SDK_INT>=29){
-                android.content.ContentValues cv=new android.content.ContentValues();cv.put(android.provider.MediaStore.Downloads.DISPLAY_NAME,name);cv.put(android.provider.MediaStore.Downloads.MIME_TYPE,"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");cv.put(android.provider.MediaStore.Downloads.RELATIVE_PATH,"Download");
-                Uri u=getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,cv);if(u==null)throw new IOException("download uri null");OutputStream o=getContentResolver().openOutputStream(u);writeXlsx(o);o.close();Toast.makeText(this,"Excel در پوشه Download ذخیره شد",Toast.LENGTH_LONG).show();
-            }else{Intent in=new Intent(Intent.ACTION_CREATE_DOCUMENT);in.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");in.putExtra(Intent.EXTRA_TITLE,name);startActivityForResult(in,91);}
-        }catch(Exception e){Toast.makeText(this,"خطا در ساخت فایل Excel: "+e.getMessage(),Toast.LENGTH_LONG).show();}
-    }
-    @Override protected void onActivityResult(int r,int c,Intent d){super.onActivityResult(r,c,d);if(r==91&&c==RESULT_OK&&d!=null){try{OutputStream o=getContentResolver().openOutputStream(d.getData());writeXlsx(o);o.close();Toast.makeText(this,"فایل Excel با موفقیت ذخیره شد",Toast.LENGTH_LONG).show();}catch(Exception e){Toast.makeText(this,"خطا در ذخیره Excel: "+e.getMessage(),Toast.LENGTH_LONG).show();}}}
-'''
-s=s[:start]+export+s[end:]
-
-# Original Shahran logo asset from the supplied logo, embedded as a compact base64 JPEG.
+# Original supplied Shahran logo.
 logo_dir=Path('app/src/main/res/drawable');logo_dir.mkdir(parents=True,exist_ok=True)
-asset=Path('assets/shahran_logo.b64')
-if asset.exists():
-    (logo_dir/'logo.jpg').write_bytes(base64.b64decode(asset.read_text().strip()))
+logo=Path('assets/shahran_logo.b64')
+(logo_dir/'logo.jpg').write_bytes(base64.b64decode(logo.read_text().strip()))
 
-# Force launcher icon/label regardless of previous patch state.
-m=Path('app/src/main/AndroidManifest.xml');ms=m.read_text()
-ms=re.sub(r'android:label="[^"]+"','android:label="دیوار قیمت یاب"',ms, count=1)
-if 'android:icon=' in ms: ms=re.sub(r'android:icon="[^"]+"','android:icon="@drawable/logo"',ms, count=1)
-else: ms=ms.replace('android:label="دیوار قیمت یاب"','android:label="دیوار قیمت یاب" android:icon="@drawable/logo"')
-if 'android:roundIcon=' in ms: ms=re.sub(r'android:roundIcon="[^"]+"','android:roundIcon="@drawable/logo"',ms, count=1)
-else: ms=ms.replace('android:icon="@drawable/logo"','android:icon="@drawable/logo" android:roundIcon="@drawable/logo"')
-m.write_text(ms)
-
-g=Path('app/build.gradle');gs=g.read_text()
-gs=re.sub(r"applicationId '[^']+'","applicationId 'com.divar.pricemeter.v13'",gs)
-gs=re.sub(r'versionCode \d+','versionCode 13',gs)
-gs=re.sub(r"versionName '[^']+'","versionName '13.0'",gs)
-g.write_text(gs)
+# Force package/version and launcher branding.
+g=Path('app/build.gradle');gs=g.read_text();gs=re.sub(r"applicationId '[^']+'","applicationId 'com.divar.pricemeter.v13'",gs);gs=re.sub(r'versionCode \d+','versionCode 13',gs);gs=re.sub(r"versionName '[^']+'","versionName '13.0'",gs);g.write_text(gs)
+m=Path('app/src/main/AndroidManifest.xml');ms=m.read_text();ms=re.sub(r'android:label="[^"]+"','android:label="دیوار قیمت یاب"',ms);ms=re.sub(r'\sandroid:icon="[^"]+"','',ms);ms=re.sub(r'\sandroid:roundIcon="[^"]+"','',ms);ms=ms.replace('android:label="دیوار قیمت یاب"','android:label="دیوار قیمت یاب" android:icon="@drawable/logo" android:roundIcon="@drawable/logo"');m.write_text(ms)
