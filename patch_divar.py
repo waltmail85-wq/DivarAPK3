@@ -15,11 +15,13 @@ s = replace_between(s, '    void collect(int n){', '    void parseSearch(){', ''
 ''')
 
 s = replace_between(s, '    void parseSearch(){', '    String unquote(', '''    void parseSearch(){
-        String js="(function(){let a=[...document.querySelectorAll('a')].map(x=>x.href||'').filter(x=>x.indexOf('/v/')>=0);return JSON.stringify([...new Set(a)]);})()";
+        String js="(function(){let a=[...document.querySelectorAll('a')].map(x=>x.href||'').filter(x=>x.indexOf('/v/')>=0);return [...new Set(a)].join('\\n');})()";
         web.evaluateJavascript(js,val->{
             String s=unquote(val);
-            Matcher m=Pattern.compile("https?://(?:www\\\\.)?divar\\\\.ir/v/[A-Za-z0-9_-]+").matcher(s);
-            while(m.find()&&links.size()<300){String u=m.group();if(!links.contains(u))links.add(u);}
+            for(String u:s.split("\\n")){
+                u=u.trim();
+                if(u.contains("/v/")&&!links.contains(u)&&links.size()<1200)links.add(u);
+            }
             if(links.isEmpty()){summary.setText("لینک آگهی‌ها پیدا نشد؛ در حال تلاش دوباره…");web.postDelayed(this::parseSearch,2500);return;}
             summary.setText("تعداد "+links.size()+" آگهی پیدا شد؛ دریافت جزئیات شروع شد…");running=true;processNext();
         });
