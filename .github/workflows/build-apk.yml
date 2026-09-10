@@ -35,12 +35,19 @@ jobs:
       - name: Fix virtualized listing collection
         run: python3 patch_count.py
 
-      - name: Build APK
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Create temporary release signing key
+        run: |
+          PASS=$(openssl rand -base64 18 | tr -dc 'A-Za-z0-9' | head -c 16)
+          echo "RELEASE_STORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          echo "RELEASE_KEY_PASSWORD=$PASS" >> "$GITHUB_ENV"
+          keytool -genkeypair -v -keystore release-key.jks -storepass "$PASS" -keypass "$PASS" -alias divar -keyalg RSA -keysize 2048 -validity 3650 -dname "CN=Divar Price Meter, OU=App, O=Shahran, L=Tabriz, ST=East Azerbaijan, C=IR"
 
-      - name: Upload APK
+      - name: Build signed Release APK
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: DivarPriceMeterPro-v10
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: DivarPriceMeterPro-v11-release
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
