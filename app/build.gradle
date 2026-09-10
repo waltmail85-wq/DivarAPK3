@@ -17,9 +17,9 @@ android {
     signingConfigs {
         release {
             storeFile file('../divar-release.keystore')
-            storePassword 'divar123456'
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
             keyAlias 'divar'
-            keyPassword 'divar123456'
+            keyPassword System.getenv('KEYSTORE_PASSWORD') ?: ''
         }
     }
 
