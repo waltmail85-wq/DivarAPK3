@@ -1,1 +1,0 @@
-UI update planned: move content below status bar/notch, improve visual hierarchy, add rounded cards/buttons, clearer Persian labels, and make the app export listing fields as filterable Excel columns.
