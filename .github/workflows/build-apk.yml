@@ -30,18 +30,12 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build unsigned release APK
-        run: gradle :app:assembleRelease --no-daemon --stacktrace
-
-      - name: Generate signing key and sign APK
-        run: |
-          keytool -genkeypair -v -keystore release-keystore.jks -storepass buildpass -keypass buildpass -alias divar -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=DivarPriceMeter, OU=App, O=DivarPriceMeter, L=Tabriz, ST=East Azerbaijan, C=IR"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks release-keystore.jks --ks-pass pass:buildpass --key-pass pass:buildpass --out app/build/outputs/apk/release/DivarPriceMeter-v5.apk app/build/outputs/apk/release/app-release-unsigned.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose app/build/outputs/apk/release/DivarPriceMeter-v5.apk
+      - name: Build APK
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: DivarPriceMeterPro-release-v5
-          path: app/build/outputs/apk/release/DivarPriceMeter-v5.apk
+          name: DivarPriceMeterPro-v5
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
