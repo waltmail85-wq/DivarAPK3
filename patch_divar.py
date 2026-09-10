@@ -20,7 +20,7 @@ s=s.replace("summary.setTextSize(15);summary.setTextColor(Color.rgb(45,70,58));"
 s=s.replace("results.setTextSize(14);results.setTextColor(Color.DKGRAY);","results.setTextSize(14);results.setTextColor(Color.rgb(225,230,238));")
 s=s.replace("rs.setBackground(bg(Color.WHITE,16));","rs.setBackground(bg(Color.rgb(12,31,53),16));")
 logo_dir=Path("app/src/main/res/drawable"); logo_dir.mkdir(parents=True,exist_ok=True)
-(logo_dir/"logo.jpg").write_bytes(base64.b64decode("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQX"))
+(logo_dir/"logo.jpg").write_bytes(base64.b64decode("/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABcQERQRDhcUEhQaGBcbIjklIh8fIkYyNSk5UkhXVVFIUE5bZoNvW2F8Yk5QcptzfIeLkpSSWG2grJ+OqoOPko3/2wBDARgaGiIeIkMlJUONXlBejY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY3/wAARCAAkACQDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAMFBAIG/8QALBAAAgEDAwEGBwEBAAAAAAAAAQIDAAQREiExBRMiMkFRgRRhcZGhweGx0f/EABcBAQEBAQAAAAAAAAAAAAAAAAIDAQD/xAAeEQACAgICAwAAAAAAAAAAAAAAAQIhAxEEEjFRYf/aAAwDAQACEQMRAD8A87GrSNpUJgblmzsPU09wLdA0ceo865U29hx98+1UreG3k6QEk0pLGVcnHJJOPrsa7juZ3n7IrE6h+N9h6/yg5bYlFaJKXRI78cDA+QjUf4M10sUFw2iIMkzeFSw0/f8AX5r0UtnbM0RkjQhtnGgbHyrE/S7fJNozRTKNxjKe+a7aXwwjXdv8LctCXDlcZYccA0Vruen3U1w7LGGfiTDDAb39dj748qKoskdWw9X6Mt0SSoz3TGhGDscKB+DmmRFpoWRS3aLucMcsPlSlBngEa4MinuD1B5H7A+vmaLdZ1cSRxs2jxFRnFYqoRqj6nNbRaJR2yMNnzg7cVxN1e4uH0wKI88YO/wB6zyHvOj+BzqU+hpcUbMxVXUAbsSPCPWscV5ML/TZxHC/xcqpIz577AEjAGfxRUOeQSSkpkIO6oPOB/wB5+poqb46k+zYllaoXVLpd3O92sRkIMnMmBq2BPPn75ooq2RLrsEXZuvunxvHJPK7yMilsHSAcDzwBUN53ddGQqDhF2A/vzO9FFDHbsUxVFFFXJH//2Q=="))
 manifest=Path("app/src/main/AndroidManifest.xml")
 m=manifest.read_text()
 m=m.replace('android:label="تحلیل قیمت دیوار"', 'android:label="دیوار قیمت یاب" android:icon="@drawable/logo"')
