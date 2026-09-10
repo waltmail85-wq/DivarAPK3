@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.divar.pricemeter'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.divar.pricemeter'
+        minSdk 23
+        targetSdk 35
+        versionCode 2
+        versionName '2.0'
+    }
+}
