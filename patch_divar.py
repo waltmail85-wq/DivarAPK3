@@ -1,6 +1,7 @@
 from pathlib import Path
+import base64
 
-p = Path('app/src/main/java/com/divar/pricemeter/MainActivity.java')
+p = Path("app/src/main/java/com/divar/pricemeter/MainActivity.java")
 s = p.read_text()
 
 def replace_between(src, start_marker, end_marker, replacement):
@@ -8,13 +9,13 @@ def replace_between(src, start_marker, end_marker, replacement):
     b = src.index(end_marker, a)
     return src[:a] + replacement + src[b:]
 
-s = replace_between(s, '    void collect(int n){', '    void parseSearch(){', '''    void collect(int n){
+s = replace_between(s, "    void collect(int n){", "    void parseSearch(){", """    void collect(int n){
         if(n>=120){parseSearch();return;}
         web.evaluateJavascript("window.scrollBy(0,Math.max(window.innerHeight*0.9,500));",x->web.postDelayed(()->collect(n+1),350));
     }
-''')
+""")
 
-s = replace_between(s, '    void parseSearch(){', '    String unquote(', '''    void parseSearch(){
+s = replace_between(s, "    void parseSearch(){", "    String unquote(", """    void parseSearch(){
         String js="(function(){let a=[...document.querySelectorAll('a')].map(x=>x.href||'').filter(x=>x.indexOf('/v/')>=0);return [...new Set(a)].join('\\n');})()";
         web.evaluateJavascript(js,val->{
             String s=unquote(val);
@@ -26,16 +27,16 @@ s = replace_between(s, '    void parseSearch(){', '    String unquote(', '''    
             summary.setText("تعداد "+links.size()+" آگهی پیدا شد؛ دریافت جزئیات شروع شد…");running=true;processNext();
         });
     }
-''')
+""")
 
-s = replace_between(s, '    void processNext(){', '    void extract(int i){', '''    void processNext(){
+s = replace_between(s, "    void processNext(){", "    void extract(int i){", """    void processNext(){
         if(!running)return;
         if(detailIndex>=links.size()){running=false;showResults();return;}
         final int i=detailIndex;detailWeb.loadUrl(links.get(i));detailWeb.postDelayed(()->extract(i),1800);
     }
-''')
+""")
 
-s = replace_between(s, '    void extract(int i){', '    Listing parse(', '''    void extract(int i){
+s = replace_between(s, "    void extract(int i){", "    Listing parse(", """    void extract(int i){
         detailWeb.evaluateJavascript("(document.querySelector('h1')||{}).innerText||''",tv->{
             String title=unquote(tv);
             detailWeb.evaluateJavascript("document.body?document.body.innerText:''",bv->{
@@ -44,6 +45,42 @@ s = replace_between(s, '    void extract(int i){', '    Listing parse(', '''    
             });
         });
     }
-''')
+""")
+
+old="""    TextView label(String s){TextView t=new TextView(this);t.setText(s);t.setTextSize(14);t.setTextColor(Color.rgb(70,70,70));t.setPadding(dp(4),dp(7),dp(4),dp(2));return t;}
+    EditText field(String h,String v){EditText e=new EditText(this);e.setHint(h);e.setText(v);e.setTextSize(15);e.setSingleLine(true);e.setPadding(dp(12),0,dp(12),0);e.setBackground(bg(Color.WHITE,14));return e;}
+    Button button(String s){Button b=new Button(this);b.setText(s);b.setTextSize(15);b.setAllCaps(false);b.setTextColor(Color.WHITE);b.setBackground(bg(Color.rgb(45,125,95),18));return b;}
+"""
+new="""    TextView label(String s){TextView t=new TextView(this);t.setText(s);t.setTextSize(14);t.setTextColor(Color.rgb(232,190,90));t.setPadding(dp(4),dp(7),dp(4),dp(2));return t;}
+    EditText field(String h,String v){EditText e=new EditText(this);e.setHint(h);e.setText(v);e.setTextSize(15);e.setTextColor(Color.WHITE);e.setHintTextColor(Color.rgb(155,165,180));e.setSingleLine(true);e.setPadding(dp(12),0,dp(12),0);e.setBackground(bg(Color.rgb(15,31,54),14));return e;}
+    Button button(String s){Button b=new Button(this);b.setText(s);b.setTextSize(15);b.setAllCaps(false);b.setTextColor(Color.rgb(10,25,45));b.setTypeface(null,1);b.setBackground(bg(Color.rgb(224,177,70),18));return b;}
+"""
+if old not in s: raise SystemExit("helper block not found")
+s=s.replace(old,new)
+
+old2="""        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.rgb(245,247,246));root.setPadding(dp(14),dp(42),dp(14),dp(10));
+        TextView title=new TextView(this);title.setText("تحلیل قیمت دیوار");title.setTextSize(23);title.setTextColor(Color.WHITE);title.setGravity(Gravity.CENTER);title.setTypeface(null,1);title.setBackground(bg(Color.rgb(32,75,57),18));root.addView(title,new LinearLayout.LayoutParams(-1,dp(58)));
+"""
+new2="""        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.rgb(6,22,43));root.setPadding(dp(14),dp(18),dp(14),dp(10));
+        LinearLayout brand=new LinearLayout(this);brand.setOrientation(LinearLayout.VERTICAL);brand.setGravity(Gravity.CENTER);brand.setBackground(bg(Color.rgb(8,29,52),20));
+        ImageView logo=new ImageView(this);logo.setImageResource(com.divar.pricemeter.R.drawable.logo);logo.setScaleType(ImageView.ScaleType.CENTER_CROP);brand.addView(logo,new LinearLayout.LayoutParams(dp(108),dp(108)));
+        TextView title=new TextView(this);title.setText("دیوار قیمت یاب");title.setTextSize(24);title.setTextColor(Color.rgb(238,194,88));title.setGravity(Gravity.CENTER);title.setTypeface(null,1);brand.addView(title,new LinearLayout.LayoutParams(-1,dp(50)));
+        TextView sub=new TextView(this);sub.setText("تحلیل و استخراج اطلاعات آگهی‌های دیوار");sub.setTextSize(13);sub.setTextColor(Color.rgb(210,180,110));sub.setGravity(Gravity.CENTER);brand.addView(sub,new LinearLayout.LayoutParams(-1,dp(34)));
+        root.addView(brand,new LinearLayout.LayoutParams(-1,dp(204)));
+"""
+if old2 not in s: raise SystemExit("root block not found")
+s=s.replace(old2,new2)
+s=s.replace("summary.setTextSize(15);summary.setTextColor(Color.rgb(45,70,58));","summary.setTextSize(15);summary.setTextColor(Color.rgb(238,194,88));")
+s=s.replace("results.setTextSize(14);results.setTextColor(Color.DKGRAY);","results.setTextSize(14);results.setTextColor(Color.rgb(225,230,238));")
+s=s.replace("rs.setBackground(bg(Color.WHITE,16));","rs.setBackground(bg(Color.rgb(12,31,53),16));")
+
+logo_dir=Path("app/src/main/res/drawable")
+logo_dir.mkdir(parents=True,exist_ok=True)
+(logo_dir/"logo.jpg").write_bytes(base64.b64decode("""/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQX"""))
+
+manifest=Path("app/src/main/AndroidManifest.xml")
+m=manifest.read_text()
+m=m.replace('android:label="تحلیل قیمت دیوار"', 'android:label="دیوار قیمت یاب" android:icon="@drawable/logo"')
+manifest.write_text(m)
 
 p.write_text(s)
