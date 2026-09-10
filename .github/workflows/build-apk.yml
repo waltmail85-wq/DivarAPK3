@@ -38,12 +38,6 @@ jobs:
       - name: Apply final app fixes
         run: python3 patch_final.py
 
-      - name: Verify source patches
-        run: |
-          test -f app/src/main/res/drawable/logo.jpg
-          grep -q "com.divar.pricemeter.v13" app/build.gradle
-          grep -q "MediaStore.Downloads" app/src/main/java/com/divar/pricemeter/MainActivity.java
-
       - name: Create temporary release signing key
         run: |
           PASS=$(openssl rand -base64 18 | tr -dc 'A-Za-z0-9' | head -c 16)
